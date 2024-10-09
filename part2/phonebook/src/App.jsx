@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
-import axios from 'axios'
+import personService from './service/persons'
 
 const App = () => {
 
@@ -16,26 +16,60 @@ const App = () => {
     e.preventDefault()
 
     if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        // update phone number
+        const person = persons.find(person => person.name === newName)
+        const changedPerson = { ...person, number: newNumber }
+
+        personService
+          .update(person.id, changedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.name === newName ? returnedPerson : person))
+          })
+      }
     } else {
+      // add new person
       const personObj = {
         name: newName,
         number: newNumber,
-        id: persons.length + 1,
       }
 
-      setPersons(persons.concat(personObj))
-      setNewName('')
-      setNewNumber('')
+      personService
+        .create(personObj)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch(error => {
+          console.log('error adding new person')
+        })
     }
   }
 
   useEffect(() => {
-    axios('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
+      })
+      .catch(error => {
+        console.log('error fetching initial data')
       })
   }, [])
+
+  const deletePerson = (id) => {
+    const person = persons.find(person => person.id === id)
+
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+        .deletePerson(id)
+        .then(deletedPerson => {
+          const newPersons = persons.filter(person => person.id !== deletedPerson.id)
+          setPersons(newPersons)
+        })
+    }
+  }
 
   return (
     <div>
@@ -55,7 +89,7 @@ const App = () => {
 
       <h2>Numbers</h2>
 
-      <Persons searchValue={searchValue} persons={persons} />
+      <Persons deletePerson={deletePerson} searchValue={searchValue} persons={persons} />
 
     </div>
   )
