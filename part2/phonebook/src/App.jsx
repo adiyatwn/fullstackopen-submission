@@ -3,14 +3,17 @@ import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
 import personService from './service/persons'
+import Notification from './Notification'
+import './style.css'
 
 const App = () => {
 
   const [persons, setPersons] = useState([])
-
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [searchValue, setSearchValue] = useState('')
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const addPerson = (e) => {
     e.preventDefault()
@@ -25,6 +28,10 @@ const App = () => {
           .update(person.id, changedPerson)
           .then(returnedPerson => {
             setPersons(persons.map(person => person.name === newName ? returnedPerson : person))
+            setSuccessMessage(`${newName} number updated successfully`)
+            setTimeout(() => {
+              setSuccessMessage(null)
+            }, 2000)
           })
       }
     } else {
@@ -40,6 +47,10 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setSuccessMessage(`Added ${newName}`)
+          setTimeout(() => {
+            setSuccessMessage(null)
+          }, 2000)
         })
         .catch(error => {
           console.log('error adding new person')
@@ -68,12 +79,22 @@ const App = () => {
           const newPersons = persons.filter(person => person.id !== deletedPerson.id)
           setPersons(newPersons)
         })
+        .catch(error => {
+          const updatedPersons = persons.filter(p => p.id !== person.id)
+          setPersons(updatedPersons)
+          setErrorMessage(`Information of ${person.name} has already been removed from server`)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 2000)
+        })
     }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification type="success" message={successMessage} />
+      <Notification type="error" message={errorMessage} />
 
       <Filter searchValue={searchValue} setSearchValue={setSearchValue} />
 
