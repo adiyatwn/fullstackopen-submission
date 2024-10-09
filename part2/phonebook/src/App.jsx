@@ -8,12 +8,17 @@ const App = () => {
 
   const addPerson = (e) => {
     e.preventDefault()
-    const personObj = {
-      name: newName
-    }
 
-    setPersons(persons.concat(personObj))
-    setNewName('')
+    if (persons.some(person => person.name === newName)) {
+      alert(`${newName} is already added to phonebook`)
+    } else {
+      const personObj = {
+        name: newName
+      }
+
+      setPersons(persons.concat(personObj))
+      setNewName('')
+    }
   }
 
   const handleInputChange = (e) => {
