@@ -58,7 +58,6 @@ const App = () => {
         })
         .catch(error => {
           setErrorMessage(error.response.data.error)
-          console.log(error)
         })
     }
   }
@@ -70,7 +69,7 @@ const App = () => {
         setPersons(initialPersons)
       })
       .catch(error => {
-        console.log('error fetching initial data')
+        setErrorMessage('error fetching initial data')
       })
   }, [])
 
