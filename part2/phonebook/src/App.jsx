@@ -33,6 +33,9 @@ const App = () => {
               setSuccessMessage(null)
             }, 2000)
           })
+          .catch(error => {
+            setErrorMessage(error.response.data.error)
+          })
       }
     } else {
       // add new person
@@ -47,13 +50,15 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setErrorMessage(null)
           setSuccessMessage(`Added ${newName}`)
           setTimeout(() => {
             setSuccessMessage(null)
           }, 2000)
         })
         .catch(error => {
-          console.log('error adding new person')
+          setErrorMessage(error.response.data.error)
+          console.log(error)
         })
     }
   }
